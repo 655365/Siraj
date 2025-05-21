@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novas AI Chatbot</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --bot-bubble: #e2e8f0;
+            --user-bubble: #2563eb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8fafc;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        #chat-container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            height: 60vh;
+            overflow-y: auto;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 18px;
+            border-radius: 20px;
+            max-width: 75%;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .user-message {
+            background-color: var(--user-bubble);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+
+        .bot-message {
+            background-color: var(--bot-bubble);
+            color: #1e293b;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+        }
+
+        #input-container {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 15px;
+            background-color: #f1f5f9;
+            font-size: 16px;
+        }
+
+        #send-button {
+            padding: 12px 25px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #send-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .typing-indicator {
+            display: none;
+            color: #64748b;
+            font-style: italic;
+            padding: 10px 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            #chat-container {
+                height: 70vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Novas 🤖</h1>
+        <p>Your Personal AI Assistant</p>
+    </div>
+
+    <div id="chat-container">
+        <div class="message bot-message">Hello! I'm Novas, your AI assistant. How can I help you today?</div>
+    </div>
+
+    <div id="input-container">
+        <input type="text" id="user-input" placeholder="Ask Novas anything..." autocomplete="off">
+        <button id="send-button">Send</button>
+    </div>
+    <div id="typing-indicator" class="typing-indicator">Novas is thinking...</div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const typingIndicator = document.getElementById('typing-indicator');
+
+        // Novas's Knowledge Base
+        const novasKnowledge = {
+            greetings: ["hello", "hi", "hey"],
+            farewells: ["bye", "goodbye", "see you"],
+            capabilities: ["what can you do", "help", "capabilities"],
+            about: ["who are you", "what are you", "novas"]
+        };
+
+        // Novas's Responses
+        const novasResponses = {
+            greeting: "Hello! How can I assist you today? 🌟",
+            farewell: "Goodbye! Feel free to come back anytime! 👋",
+            capabilities: "I can help with:\n- Answering questions\n- Providing information\n- General conversation\n- Task assistance",
+            about: "I'm Novas, an AI chatbot created to help you with various tasks and conversations!",
+            default: "I'm always learning! For more complex queries, consider enabling my advanced AI mode below ⚡",
+            error: "Hmm, I'm having trouble connecting right now. Please try again later."
+        };
+
+        // Core Functions
+        function addMessage(message, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', isUser ? 'user-message' : 'bot-message');
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            typingIndicator.style.display = 'block';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            typingIndicator.style.display = 'none';
+        }
+
+        function processInput() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+            showTyping();
+
+            setTimeout(() => {
+                const response = generateResponse(message);
+                addMessage(response, false);
+                hideTyping();
+            }, 1000);
+        }
+
+        function generateResponse(input) {
+            const lowerInput = input.toLowerCase();
+            
+            if (novasKnowledge.greetings.some(g => lowerInput.includes(g))) {
+                return novasResponses.greeting;
+            }
+            if (novasKnowledge.farewells.some(f => lowerInput.includes(f))) {
+                return novasResponses.farewell;
+            }
+            if (novasKnowledge.capabilities.some(c => lowerInput.includes(c))) {
+                return novasResponses.capabilities;
+            }
+            if (novasKnowledge.about.some(a => lowerInput.includes(a))) {
+                return novasResponses.about;
+            }
+            
+            return novasResponses.default;
+        }
+
+        // Event Listeners
+        sendButton.addEventListener('click', processInput);
+        userInput.addEventListener('keypress', (e) => e.key === 'Enter' && processInput());
+
+        // Optional: Uncomment to enable OpenAI integration
+        /*
+        async function advancedAIResponse(input) {
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer YOUR_API_KEY'
+                    },
+                    body: JSON.stringify({
+                        model: "gpt-3.5-turbo",
+                        messages: [{
+                            role: "system",
+                            content: "You are Novas, a helpful AI assistant. Respond in friendly, conversational style."
+                        }, {
+                            role: "user",
+                            content: input
+                        }]
+                    })
+                });
+                
+                const data = await response.json();
+                return data.choices[0].message.content;
+            } catch (error) {
+                console.error("AI Error:", error);
+                return novasResponses.error;
+            }
+        }
+        */
+    </script>
+</body>
+</html>
